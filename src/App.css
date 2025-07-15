@@ -1,5 +1,28 @@
+.paid{
+    background-color: rgb(195, 231, 220);
+    color: rgb(38, 205, 152);
+}
+
+.unpaid{
+    background-color: rgb(237, 212, 212);
+    color: rgb(228, 28, 28);
+}
+
+.overdue{
+    background-color: rgb(246, 246, 162);
+    color: rgb(222, 222, 25);
+}
+
+.received{
+    background-color: rgb(29, 226, 177);
+}
+
+.pending{
+    background-color: rgb(28, 142, 224);
+    color: rgb(155, 155, 155);
+}
+
 @media (max-width: 426px) {
-    
     .product-table {
         font-size: 9px !important;
     }

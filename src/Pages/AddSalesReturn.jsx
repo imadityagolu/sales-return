@@ -1,8 +1,15 @@
+import { useState } from 'react';
+import { Button, Modal } from 'react-bootstrap';
 import { IoMdCloseCircle } from "react-icons/io";
 import { CiCirclePlus } from "react-icons/ci";
 import { LuScanBarcode } from "react-icons/lu";
 
 function AddSalesReturn() {
+
+  const [show, setShow] = useState(false);
+
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
 
   return (
     <>
@@ -34,9 +41,37 @@ function AddSalesReturn() {
               <option>select</option>
               <option>Customer Name</option>
               </select>
-              <CiCirclePlus style={{border:'1px solid #1B2B4F', backgroundColor:'#1B2B4F', color:'white', fontSize:'36px', borderRadius:'5px'}} />
+              <div onClick={handleShow} style={{cursor:'pointer'}}>
+                <CiCirclePlus style={{border:'1px solid #1B2B4F', backgroundColor:'#1B2B4F', color:'white', fontSize:'36px', borderRadius:'5px'}} />
+              </div>
             </div>
           </div>
+
+      <Modal show={show} onHide={handleClose} centered>
+
+        <Modal.Header closeButton>
+          <Modal.Title>Add Customer</Modal.Title>
+        </Modal.Header>
+        
+        <Modal.Body style={{}}>
+          <div style={{padding:'0px', margin:'0px'}}>
+
+          <div style={{borderBottom:'1px solid #E6EAEC', padding:'5px'}}>
+            <span>Customer <span style={{color:'red'}}>*</span></span>
+            <br/>
+            <input className='form-control' type='text' placeholder='Enter Customer Name' />
+            <br/>
+          </div>
+
+          <div style={{padding:'15px 0px 0px', display:'flex', justifyContent:'end', gap:'10px'}}>
+            <button className='btn' style={{backgroundColor:'#1B2B4F', color:'white'}}>Cancel</button>
+            <button className='btn' style={{backgroundColor:'#FAA046', color:'white'}}>Add  Customer</button>
+          </div>
+
+          </div>
+        </Modal.Body>
+
+      </Modal>
 
           <div className='col-sm-4 mt-2'>
             <div>Date <span style={{color:'red'}}>*</span></div>
