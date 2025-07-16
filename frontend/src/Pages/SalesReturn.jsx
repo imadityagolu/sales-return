@@ -225,7 +225,7 @@ function SalesReturn() {
                 <button onClick={handleCSV} style={{backgroundColor:'white', padding:'4px 7px', display:'flex', alignItems:'center', border:'1px solid #E6EAEC',borderRadius:'5px'}}><BsFiletypeXml style={{color:'green'}} /></button>
                 <button onClick={() => location.reload()} style={{backgroundColor:'white', padding:'4px 7px', display:'flex', alignItems:'center', border:'1px solid #E6EAEC',borderRadius:'5px'}}><LuRefreshCcw style={{color:'#8d8f90ff'}} /></button>
                 <div style={{backgroundColor:'white', padding:'4px 7px', display:'flex', alignItems:'center', border:'1px solid #E6EAEC',borderRadius:'5px'}}><IoIosArrowUp style={{color:'#8d8f90ff'}} /></div>
-                <div style={{backgroundColor:'#FAA046', color:'white', padding:'4px 5px', alignItems:'center', border:'1px solid #E6EAEC',borderRadius:'5px', display:'flex', gap:'5px'}}><CiCirclePlus className='sricon' style={{fontSize:'25px'}} /> <Link to="/AddSalesReturn" style={{textDecoration:'none', color:'white'}}>Add Sales Return</Link></div>
+                <div style={{backgroundColor:'#FAA046', color:'white', padding:'4px 5px', alignItems:'center', border:'1px solid #E6EAEC',borderRadius:'5px', display:'flex', gap:'5px'}}><Link to="/AddSalesReturn" style={{textDecoration:'none', color:'white'}}><CiCirclePlus className='sricon' style={{fontSize:'25px'}} /> Add Sales Return</Link></div>
             </div>
         </div>
 

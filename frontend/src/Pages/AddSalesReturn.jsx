@@ -4,13 +4,52 @@ import { IoMdCloseCircle } from "react-icons/io";
 import { CiCirclePlus } from "react-icons/ci";
 import { LuScanBarcode } from "react-icons/lu";
 import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
 
 function AddSalesReturn() {
+
+  const backend_url = import.meta.env.VITE_BACKEND_URL;
 
   const [show, setShow] = useState(false);
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
+
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+  const [addCustomerName, setAddCustomer] = useState('');
+  const [customers, setCustomers] = useState([]);
+
+  const handleAddCustomer = async(e) => {
+    e.preventDefault();
+    setMessage();
+    try{
+      const res = await fetch(`${backend_url}/api/customer/add`, {
+        method: 'POST',
+        headers: { 'Content-Type' : 'application/json' },
+        body: JSON.stringify({ addCustomerName })
+      });
+
+      const data = await res.json();
+
+      if(res.ok){
+        setMessage(data.alert);
+      } else {
+        setMessage("Error : " + data.error);
+      }
+
+    } catch(error) {
+      setMessage("Error : " + error.message);
+    }
+  }
+
+  const fetchCustomers = () => {
+    fetch(`${backend_url}/api/customer/list`)
+    .then(res => res.json())
+    .then(data => { setCustomers(data);})
+    .catch((error) => { setError(error.message); })
+  };
+  useEffect(() => {fetchCustomers();});
 
   return (
     <>
@@ -39,8 +78,10 @@ function AddSalesReturn() {
             <div>Customer Name <span style={{color:'red'}}>*</span></div>
             <div style={{width:'100%', display:'flex', gap:'5px', alignItems:'center', justifyContent:'space-between'}}>
               <select style={{border:'1px solid #E6EAEC', borderRadius:'5px', padding:'7px', width:'100%'}}>
-              <option>select</option>
-              <option>Customer Name</option>
+              <option>--select customer--</option>
+              {customers.map((e) => 
+              <option key={e._id} value={e.customerName}>{e.customerName}</option>
+              )}
               </select>
               <div onClick={handleShow} style={{cursor:'pointer'}}>
                 <CiCirclePlus style={{border:'1px solid #1B2B4F', backgroundColor:'#1B2B4F', color:'white', fontSize:'36px', borderRadius:'5px'}} />
@@ -48,7 +89,7 @@ function AddSalesReturn() {
             </div>
           </div>
 
-      {/* popup */}
+      {/* show - popup */}
       <Modal show={show} onHide={handleClose} centered>
 
         <Modal.Header closeButton>
@@ -57,19 +98,20 @@ function AddSalesReturn() {
         
         <Modal.Body style={{}}>
           <div style={{padding:'0px', margin:'0px'}}>
-
+          <form onSubmit={handleAddCustomer} onReset={() => { setAddCustomer(''); setMessage(''); }}>
           <div style={{borderBottom:'1px solid #E6EAEC', padding:'5px'}}>
             <span>Customer <span style={{color:'red'}}>*</span></span>
             <br/>
-            <input className='form-control' type='text' placeholder='Enter Customer Name' />
+            <input className='form-control' type='text' placeholder='Enter Customer Name' value={addCustomerName} onChange={e => setAddCustomer(e.target.value)} required />
             <br/>
           </div>
 
           <div style={{padding:'15px 0px 0px', display:'flex', justifyContent:'end', gap:'10px'}}>
-            <button className='btn' style={{backgroundColor:'#1B2B4F', color:'white'}}>Cancel</button>
-            <button className='btn' style={{backgroundColor:'#FAA046', color:'white'}}>Add  Customer</button>
+            <button type="reset" className='btn' style={{backgroundColor:'#1B2B4F', color:'white'}}>Clear</button>
+            <button type="submit" className='btn' style={{backgroundColor:'#FAA046', color:'white'}}>Add  Customer</button>
           </div>
-
+          </form>
+          {message && <div style={{color:'red', textAlign:'center', marginTop:'10px'}}>{message}</div>}
           </div>
         </Modal.Body>
 
@@ -84,7 +126,8 @@ function AddSalesReturn() {
             <div>Reference <span style={{color:'red'}}>*</span></div>
             <input type='text' placeholder='Reference' className='form-control' style={{width:'100%'}} />
           </div>
-
+        
+          {error && <div style={{color:'red', textAlign:'center', marginTop:'10px'}}>{error}</div>}
         </div>
 
         {/* 2nd row */}
@@ -194,7 +237,7 @@ function AddSalesReturn() {
 
         {/* buttons */}
         <div style={{padding:'10px', display:'flex', justifyContent:'end', gap:'10px'}}>
-          <button className='btn' style={{backgroundColor:'#1B2B4F', color:'white'}}>Cancel</button>
+          <Link to="/" className='btn' style={{backgroundColor:'#1B2B4F', color:'white'}}>Cancel</Link>
           <button className='btn' style={{backgroundColor:'#FAA046', color:'white'}}>Submit</button>
         </div>
 
