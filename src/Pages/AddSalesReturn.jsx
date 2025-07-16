@@ -3,6 +3,7 @@ import { Button, Modal } from 'react-bootstrap';
 import { IoMdCloseCircle } from "react-icons/io";
 import { CiCirclePlus } from "react-icons/ci";
 import { LuScanBarcode } from "react-icons/lu";
+import { Link } from 'react-router-dom';
 
 function AddSalesReturn() {
 
@@ -22,9 +23,9 @@ function AddSalesReturn() {
             Add Sales Return
           </div>
 
-          <div style={{padding:'10px'}}>
+          <Link to="/" style={{padding:'10px'}}>
             <IoMdCloseCircle style={{color:'red',fontSize:'25px'}} />
-          </div>
+          </Link>
 
         </div>
 
@@ -47,6 +48,7 @@ function AddSalesReturn() {
             </div>
           </div>
 
+      {/* popup */}
       <Modal show={show} onHide={handleClose} centered>
 
         <Modal.Header closeButton>

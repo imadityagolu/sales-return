@@ -211,21 +211,21 @@ const handleCSV = () => {
 function SalesReturn() {
   return (
     <>
-    <div style={{padding:'15px 20px'}}>
+    <div className='srbody' style={{padding:'15px 20px'}}>
 
         {/* header */}
         <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
             <div>
-                <span style={{fontSize:'20px', fontWeight:'500'}}>Sales Return</span>
+                <span className='srheader' style={{fontSize:'20px', fontWeight:'500'}}>Sales Return</span>
                 <br/>
-                <span style={{color:'#a9abacff'}}>Manage your returns</span>
+                <span className='srtitle' style={{color:'#a9abacff'}}>Manage your returns</span>
             </div>
-            <div style={{display:'flex', gap:'10px'}}>
+            <div className='srheadbtn' style={{display:'flex', gap:'10px'}}>
                 <button onClick={handlePdf} style={{backgroundColor:'white', padding:'4px 7px', display:'flex', alignItems:'center', border:'1px solid #E6EAEC',borderRadius:'5px'}}><FaFilePdf style={{color:'red'}} /></button>
                 <button onClick={handleCSV} style={{backgroundColor:'white', padding:'4px 7px', display:'flex', alignItems:'center', border:'1px solid #E6EAEC',borderRadius:'5px'}}><BsFiletypeXml style={{color:'green'}} /></button>
                 <button onClick={() => location.reload()} style={{backgroundColor:'white', padding:'4px 7px', display:'flex', alignItems:'center', border:'1px solid #E6EAEC',borderRadius:'5px'}}><LuRefreshCcw style={{color:'#8d8f90ff'}} /></button>
                 <div style={{backgroundColor:'white', padding:'4px 7px', display:'flex', alignItems:'center', border:'1px solid #E6EAEC',borderRadius:'5px'}}><IoIosArrowUp style={{color:'#8d8f90ff'}} /></div>
-                <div style={{backgroundColor:'#FAA046', color:'white', padding:'4px 5px', alignItems:'center', border:'1px solid #E6EAEC',borderRadius:'5px', display:'flex', gap:'5px'}}><CiCirclePlus style={{fontSize:'25px'}} /> <Link to="/AddSalesReturn" style={{textDecoration:'none', color:'white'}}>Add Sales Return</Link></div>
+                <div style={{backgroundColor:'#FAA046', color:'white', padding:'4px 5px', alignItems:'center', border:'1px solid #E6EAEC',borderRadius:'5px', display:'flex', gap:'5px'}}><CiCirclePlus className='sricon' style={{fontSize:'25px'}} /> <Link to="/AddSalesReturn" style={{textDecoration:'none', color:'white'}}>Add Sales Return</Link></div>
             </div>
         </div>
 
@@ -235,21 +235,21 @@ function SalesReturn() {
         {/* search box */}
         <div style={{backgroundColor:'white', padding:'10px'}}>
           <div style={{display:'flex', justifyContent:'space-between'}}>
-            <div style={{border:'1px solid #E6EAEC', alignItems:'center', padding:'5px', borderRadius:'5px'}}>
+            <div className='srsearchrow' style={{border:'1px solid #E6EAEC', alignItems:'center', padding:'5px', borderRadius:'5px'}}>
               <CiSearch style={{color:'#8d8f90ff'}} />
               <input type="text" placeholder='search' style={{border:'none', color:'#8d8f90ff', outline:'none'}} />
             </div>
             <div style={{display:'flex', gap:'5px'}}>
-              <select style={{border:'1px solid #E6EAEC', color:'#8d8f90ff'}}>
+              <select style={{border:'1px solid #E6EAEC', color:'#8d8f90ff', borderRadius:'5px'}}>
                 <option>Customer</option>
               </select>
-              <select style={{border:'1px solid #E6EAEC', color:'#8d8f90ff'}}>
+              <select style={{border:'1px solid #E6EAEC', color:'#8d8f90ff', borderRadius:'5px'}}>
                 <option>Status</option>
               </select>
-              <select style={{border:'1px solid #E6EAEC', color:'#8d8f90ff'}}>
+              <select style={{border:'1px solid #E6EAEC', color:'#8d8f90ff', borderRadius:'5px'}}>
                 <option>Payment Status</option>
               </select>
-              <select style={{border:'1px solid #E6EAEC', color:'#8d8f90ff'}}>
+              <select style={{border:'1px solid #E6EAEC', color:'#8d8f90ff', borderRadius:'5px'}}>
                 <option>Sort By: Last 7 Days</option>
               </select>
             </div>
@@ -257,11 +257,11 @@ function SalesReturn() {
         </div>
         
         {/* product listing table */}
-        <div style={{backgroundColor:'white', borderTop:'1px solid #a9abacff'}}>
+        <div className='sproduct-table' style={{backgroundColor:'white', borderTop:'1px solid #a9abacff', fontSize:'15px'}}>
           <table style={{width:'100%', backgroundColor:'#E6EAEC'}}>
             <thead>
               <tr>
-                <th style={{padding:'10px'}}><input type="checkbox"/></th>
+                <th className='srtablehead' style={{padding:'10px'}}><input type="checkbox"/></th>
                 <th>Product</th>
                 <th>Date</th>
                 <th>Customer</th>
@@ -278,18 +278,20 @@ function SalesReturn() {
             <>
               <tr key={e.id} style={{backgroundColor:'white', borderTop:'1px solid #a9abacff', color:'#8d8f90ff'}}>
                 <td style={{padding:'10px'}}><input type="checkbox"/></td>
-                <td><img src={e.img} style={{width:'30px', borderRadius:'5px'}} /> <span style={{color:'#272727ff'}}>{e.name}</span></td>
+                <td><img className='srimg' src={e.img} style={{width:'30px', borderRadius:'5px'}} /> <span style={{color:'#272727ff'}}>{e.name}</span></td>
                 <td>{e.date}</td>
-                <td><img src={e.customerImg} style={{width:'30px', borderRadius:'5px'}} /> <span style={{color:'#272727ff'}}>{e.customerName}</span></td>
+                <td><img className='srimg' src={e.customerImg} style={{width:'30px', borderRadius:'5px'}} /> <span style={{color:'#272727ff'}}>{e.customerName}</span></td>
                 <td><span className={`${status(e.status)}`} style={{color:'white', padding:'2px 5px', borderRadius:'5px'}}>{e.status}</span></td>
                 <td>${e.total}</td>
                 <td>${e.paid}</td>
                 <td>${e.due}</td>
                 <td><span className={`${paymentStatus(e.paymentStatus)}`} style={{padding:'2px 5px', borderRadius:'5px'}}> • {e.paymentStatus}</span></td>
-                <td><div style={{display:'flex', gap:'5px'}}>
-                  <div style={{backgroundColor:'white', padding:'5px 7px', display:'flex', alignItems:'center', border:'1px solid #E6EAEC',borderRadius:'5px'}}><FaRegEdit style={{color:'#272727ff'}} /></div>
-                  <div style={{backgroundColor:'white', padding:'5px 7px', display:'flex', alignItems:'center', border:'1px solid #E6EAEC',borderRadius:'5px'}}><RiDeleteBin5Line style={{color:'#272727ff'}} /></div>
-                  </div></td>
+                <td>
+                  <div style={{display:'flex', gap:'5px'}}>
+                  <div className='srtableicon' style={{backgroundColor:'white', padding:'5px 7px', display:'flex', alignItems:'center', border:'1px solid #E6EAEC',borderRadius:'5px'}}><FaRegEdit style={{color:'#272727ff'}} /></div>
+                  <div className='srtableicon' style={{backgroundColor:'white', padding:'5px 7px', display:'flex', alignItems:'center', border:'1px solid #E6EAEC',borderRadius:'5px'}}><RiDeleteBin5Line style={{color:'#272727ff'}} /></div>
+                  </div>
+                </td>
               </tr>
             </>
             )}
@@ -300,16 +302,16 @@ function SalesReturn() {
         {/* rows filter */}
         <div style={{display:'flex', justifyContent:'space-between', padding:'15px', backgroundColor:'white'}}>
             <div style={{display:'flex', gap:'10px', alignItems:'center', color:'#8d8f90ff'}}>
-              <span>Row Per Page</span>
-              <select style={{borderRadius:'5px', color:'#8d8f90ff'}}>
+              <span className='srrowtitle'>Row Per Page</span>
+              <select className='srselect' style={{borderRadius:'5px', color:'#8d8f90ff'}}>
                 <option>10</option>
                 <option>20</option>
               </select>
-              <span>Entries</span>
+              <span className='srrowtitle'>Entries</span>
             </div>
             <div style={{display:'flex', gap:'10px', alignItems:'center'}}>
               <div><IoIosArrowBack style={{color:'#8d8f90ff'}} /></div>
-              <div style={{backgroundColor:'orange', padding:'5px 12px', borderRadius:'50%', color:'white'}}>1</div>
+              <div className='srpage' style={{backgroundColor:'orange', padding:'5px 12px', borderRadius:'50%', color:'white'}}>1</div>
               <div><IoIosArrowForward style={{color:'#8d8f90ff'}} /></div>
             </div>
         </div>
