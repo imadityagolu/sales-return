@@ -25,6 +25,9 @@ function AddSalesReturn() {
 
   const [products, setProducts] = useState([]);
 
+  const [productSearch, setProductSearch] = useState('');
+  const [showProductDropdown, setShowProductDropdown] = useState(false);
+
   const [selectedProduct, setSelectedProduct] = useState(null);
   
   const [orderTax, setOrderTax] = useState('');
@@ -34,11 +37,7 @@ function AddSalesReturn() {
   const [customerName, setCustomerName] = useState('');
   const [date, setDate] = useState('');
   const [reference, setReference] = useState('');
-  // const [productName, setProductName] = useState('');
   const [grandTotal, setGrandTotal] = useState(0);
-  // const [paid, setPaid] = useState('');
-  // const [due, setDue] = useState('');
-  // const [paymentstatus, setPaymentstatus] = useState('');
   const [returnstatus, setReturnStatus] = useState('');
 
   const handleAddCustomer = async(e) => {
@@ -89,6 +88,10 @@ function AddSalesReturn() {
     });
   }
 };
+
+const filteredProducts = products.filter(p =>
+  p.name.toLowerCase().includes(productSearch.toLowerCase())
+);
 
 const productSubtotal = (selectedProduct) => {
   if (!selectedProduct) return 0;
@@ -230,13 +233,33 @@ const handleSalesReturn = async(e) => {
         <div className='row mt-3'>
           <div className='col'>
             <div>Product <span style={{color:'red'}}>*</span></div>
-            <div style={{display:'flex', justifyContent:'space-between', width:'100%', border:'1px solid #E6EAEC', borderRadius:'5px', alignItems:'center', padding:'7px'}}>
-              <select value={selectedProduct ? selectedProduct._id : ''} onChange={e => handleSelectedProduct(e.target.value)} style={{borderRadius:'5px', padding:'2px', width:'100%', border:'none', outline:'none'}} required >
-              <option>--select product--</option>
-              {products.map((e) => 
-              <option key={e._id} value={e._id}>{e.name}</option>
+            <div style={{display:'flex', justifyContent:'space-between', width:'100%', border:'1px solid #E6EAEC', borderRadius:'5px', alignItems:'center', padding:'2px'}}>
+              <div style={{position:'relative', width:'98%'}}>
+               <input type="text" className="form-control" placeholder="Please Type Product Name and Select" style={{outline:'none', border:'none'}} value={productSearch}
+                onChange={e => {
+                setProductSearch(e.target.value);
+                setShowProductDropdown(true);
+                }}
+                onFocus={() => setShowProductDropdown(true)}
+                onBlur={() => setTimeout(() => setShowProductDropdown(false), 150)} // Delay to allow click
+                required
+               />
+              {showProductDropdown && filteredProducts.length > 0 && (
+              <ul style={{ position: 'absolute', zIndex: 10, background: 'white', border: '1px solid #E6EAEC', width: '100%', maxHeight: '150px', overflowY: 'auto', listStyle: 'none', margin: 0, padding: 0 }}>
+                {filteredProducts.map(product => (
+                <li key={product._id} style={{ padding: '7px', cursor: 'pointer' }}
+                  onMouseDown={() => {
+                  setSelectedProduct({ ...product, qty: 1 });
+                  setProductSearch(product.name);
+                  setShowProductDropdown(false);
+                  }}
+                >
+                {product.name}
+                </li>
+                ))}
+              </ul>
               )}
-              </select>
+              </div>
               <LuScanBarcode />
             </div>
           </div>
