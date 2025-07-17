@@ -4,6 +4,8 @@ require('dotenv/config');
 const cors = require("cors");
 const mongoose = require("mongoose");
 const customerRouter = require('./routers/addcustomer.router');
+const productRouter = require('./routers/products.router');
+const salesRouter = require('./routers/salesreturn.router');
 
 const PORT = process.env.PORT;
 
@@ -21,3 +23,5 @@ mongoose.connect(process.env.MONGOODB_URL)
 .catch((error) => {console.log(error);});
 
 app.use("/api/customer", customerRouter);
+app.use("/api/products", productRouter);
+app.use("/api/sales", salesRouter);

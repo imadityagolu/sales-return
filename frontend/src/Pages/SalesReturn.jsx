@@ -15,100 +15,36 @@ import Customer from '../img/c.jpg';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import '../App.css';
+import { useState, useEffect } from 'react';
 
-const productData = [
-  {
-    id: 1,
-    img: `${Product}`,
-    name: 'Lenovo IdeaPad 3',
-    date:'19 Nov 2022',
-    customerImg: `${Customer}`,
-    customerName: 'Carl Evans',
-    status: 'Received',
-    total:1000,
-    paid:1000,
-    due:'0.00',
-    paymentStatus:'Paid'
-  },
-  {
-    id: 2,
-    img: `${Product}`,
-    name: 'Lenovo IdeaPad 3',
-    date:'19 Nov 2022',
-    customerImg: `${Customer}`,
-    customerName: 'Minerva Rameriz',
-    status: 'Pending',
-    total:1500,
-    paid:'0.00',
-    due:1500,
-    paymentStatus:'Unpaid'
-  },
-  {
-    id: 3,
-    img: `${Product}`,
-    name: 'Lenovo IdeaPad 3',
-    date:'19 Nov 2022',
-    customerImg: `${Customer}`,
-    customerName: 'Robert Lamon',
-    status: 'Received',
-    total:2000,
-    paid:1000,
-    due:'1000',
-    paymentStatus:'Overdue'
-  },
-  {
-    id: 4,
-    img: `${Product}`,
-    name: 'Lenovo IdeaPad 3',
-    date:'19 Nov 2022',
-    customerImg: `${Customer}`,
-    customerName: 'Carl Evans',
-    status: 'Received',
-    total:1000,
-    paid:1000,
-    due:'0.00',
-    paymentStatus:'Paid'
-  },
-  {
-    id: 5,
-    img: `${Product}`,
-    name: 'Lenovo IdeaPad 3',
-    date:'19 Nov 2022',
-    customerImg: `${Customer}`,
-    customerName: 'Carl Evans',
-    status: 'Received',
-    total:1000,
-    paid:1000,
-    due:'0.00',
-    paymentStatus:'Paid'
-  },
-  {
-    id: 6,
-    img: `${Product}`,
-    name: 'Lenovo IdeaPad 3',
-    date:'19 Nov 2022',
-    customerImg: `${Customer}`,
-    customerName: 'Carl Evans',
-    status: 'Received',
-    total:1000,
-    paid:1000,
-    due:'0.00',
-    paymentStatus:'Paid'
-  },
-  {
-    id: 7,
-    img: `${Product}`,
-    name: 'Lenovo IdeaPad 3',
-    date:'19 Nov 2022',
-    customerImg: `${Customer}`,
-    customerName: 'Carl Evans',
-    status: 'Received',
-    total:1000,
-    paid:1000,
-    due:'0.00',
-    paymentStatus:'Paid'
-  }
-]
+function SalesReturn() {
+
+  const backend_url = import.meta.env.VITE_BACKEND_URL;
+  
+  const [products, setProducts] = useState([]);
+  const [error, setError] = useState('');
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+const fetchProducts = () => {
+  fetch(`${backend_url}/api/sales/listsalesreturn`)
+    .then(res => res.json())
+    .then(data => { 
+      const monthAbbr = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      const formattedData = data.map(item => {
+      const date = new Date(item.date);
+      const formattedDate = `${date.getDate().toString().padStart(2, '0')} ${monthAbbr[date.getMonth()]} ${date.getFullYear()}`;
+      return {
+        ...item,
+        formattedDate
+        };
+      });
+      setProducts(formattedData);
+      })
+    .catch((error) => { setError(error.message); });
+};
+useEffect(() => {fetchProducts();}, []);
 
 const status = (status) => {
   switch (status) {
@@ -131,7 +67,6 @@ const handlePdf = () => {
   const doc = new jsPDF();
   doc.text("Sales Return",14,15);
   const tableColumns = [
-    "Serial no",
     "Product",
     "Date",
     "Customer",
@@ -142,16 +77,15 @@ const handlePdf = () => {
     "Payment Status",
   ];
 
-  const tableRows = productData.map((e) =>[
-    e.id,
-    e.name,
-    e.date,
+  const tableRows = products.map((e) =>[
+    e.productName,
+    e.formattedDate,
     e.customerName,
-    e.status,
-    e.total,
+    e.returnstatus,
+    e.grandTotal,
     e.paid,
     e.due,
-    e.paymentStatus,
+    e.paymentstatus,
   ]);
 
   autoTable(doc, {
@@ -173,7 +107,6 @@ const handlePdf = () => {
 
 const handleCSV = () => {
   const tableHeader = [
-    "Serial no",
     "Product",
     "Date",
     "Customer",
@@ -185,16 +118,15 @@ const handleCSV = () => {
   ];
   const csvRows = [
     tableHeader.join(","),
-    ...productData.map((e) => [
-    e.id,
-    e.name,
-    e.date,
+    ...products.map((e) => [
+    e.productName,
+    e.formattedDate,
     e.customerName,
-    e.status,
-    e.total,
+    e.returnstatus,
+    e.grandTotal,
     e.paid,
     e.due,
-    e.paymentStatus,
+    e.paymentstatus,
     ].join(",")),
   ];
   const csvContent = "data:text/csv;charset=utf-8," + csvRows.join("\n");
@@ -208,7 +140,32 @@ const handleCSV = () => {
   document.body.removeChild(link);
 }
 
-function SalesReturn() {
+const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this sales return?")) return;
+    try {
+      const res = await fetch(`${backend_url}/api/sales/delete/${id}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setProducts(products.filter(item => item._id !== id));
+      } else {
+        alert(data.error || "Delete failed");
+      }
+    } catch (err) {
+      alert("Error: " + err.message);
+    }
+};
+
+const indexOfLastItem = currentPage * itemsPerPage;
+const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+const currentProducts = products.slice(indexOfFirstItem, indexOfLastItem);
+
+const totalPages = Math.ceil(products.length / itemsPerPage);
+useEffect(() => {
+  setCurrentPage(1);
+}, [products]);
+
   return (
     <>
     <div className='srbody' style={{padding:'15px 20px'}}>
@@ -230,7 +187,7 @@ function SalesReturn() {
         </div>
 
         {/* table body */}
-        <div className='mt-3' style={{border:'1px solid #a9abacff', borderRadius:'10px', overflow:'hidden'}}>
+        <div className='mt-2' style={{border:'1px solid #a9abacff', borderRadius:'10px', overflow:'hidden'}}>
 
         {/* search box */}
         <div style={{backgroundColor:'white', padding:'10px'}}>
@@ -274,22 +231,22 @@ function SalesReturn() {
               </tr>
             </thead>
             <tbody>
-            {productData.map((e) =>
+            {currentProducts.map((e) =>
             <>
               <tr key={e.id} style={{backgroundColor:'white', borderTop:'1px solid #a9abacff', color:'#8d8f90ff'}}>
                 <td style={{padding:'10px'}}><input type="checkbox"/></td>
-                <td><img className='srimg' src={e.img} style={{width:'30px', borderRadius:'5px'}} /> <span style={{color:'#272727ff'}}>{e.name}</span></td>
-                <td>{e.date}</td>
-                <td><img className='srimg' src={e.customerImg} style={{width:'30px', borderRadius:'5px'}} /> <span style={{color:'#272727ff'}}>{e.customerName}</span></td>
-                <td><span className={`${status(e.status)}`} style={{color:'white', padding:'2px 5px', borderRadius:'5px'}}>{e.status}</span></td>
-                <td>${e.total}</td>
+                <td><img className='srimg' src={Product} style={{width:'30px', borderRadius:'5px'}} /> <span style={{color:'#272727ff'}}>{e.productName}</span></td>
+                <td>{e.formattedDate}</td>
+                <td><img className='srimg' src={Customer} style={{width:'30px', borderRadius:'5px'}} /> <span style={{color:'#272727ff'}}>{e.customerName}</span></td>
+                <td><span className={`${status(e.returnstatus)}`} style={{color:'white', padding:'2px 5px', borderRadius:'5px'}}>{e.returnstatus}</span></td>
+                <td>${e.grandTotal}</td>
                 <td>${e.paid}</td>
                 <td>${e.due}</td>
-                <td><span className={`${paymentStatus(e.paymentStatus)}`} style={{padding:'2px 5px', borderRadius:'5px'}}> • {e.paymentStatus}</span></td>
+                <td><span className={`${paymentStatus(e.paymentstatus)}`} style={{padding:'2px 5px', borderRadius:'5px'}}> • {e.paymentstatus}</span></td>
                 <td>
                   <div style={{display:'flex', gap:'5px'}}>
-                  <div className='srtableicon' style={{backgroundColor:'white', padding:'5px 7px', display:'flex', alignItems:'center', border:'1px solid #E6EAEC',borderRadius:'5px'}}><FaRegEdit style={{color:'#272727ff'}} /></div>
-                  <div className='srtableicon' style={{backgroundColor:'white', padding:'5px 7px', display:'flex', alignItems:'center', border:'1px solid #E6EAEC',borderRadius:'5px'}}><RiDeleteBin5Line style={{color:'#272727ff'}} /></div>
+                  <button className='srtableicon' style={{backgroundColor:'white', padding:'5px 7px', display:'flex', alignItems:'center', border:'1px solid #E6EAEC',borderRadius:'5px'}}><FaRegEdit style={{color:'#272727ff'}} /></button>
+                  <button onClick={() => handleDelete(e._id)} className='srtableicon' style={{backgroundColor:'white', padding:'5px 7px', display:'flex', alignItems:'center', border:'1px solid #E6EAEC',borderRadius:'5px'}}><RiDeleteBin5Line style={{color:'#272727ff'}} /></button>
                   </div>
                 </td>
               </tr>
@@ -297,6 +254,7 @@ function SalesReturn() {
             )}
             </tbody>
           </table>
+          {error && <p>{error}</p>}
         </div>
 
         {/* rows filter */}
@@ -305,14 +263,13 @@ function SalesReturn() {
               <span className='srrowtitle'>Row Per Page</span>
               <select className='srselect' style={{borderRadius:'5px', color:'#8d8f90ff'}}>
                 <option>10</option>
-                <option>20</option>
               </select>
               <span className='srrowtitle'>Entries</span>
             </div>
             <div style={{display:'flex', gap:'10px', alignItems:'center'}}>
-              <div><IoIosArrowBack style={{color:'#8d8f90ff'}} /></div>
-              <div className='srpage' style={{backgroundColor:'orange', padding:'5px 12px', borderRadius:'50%', color:'white'}}>1</div>
-              <div><IoIosArrowForward style={{color:'#8d8f90ff'}} /></div>
+              <button style={{border:'none'}} onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1}><IoIosArrowBack style={{color:'#8d8f90ff'}} /></button>
+              <div className='srpage' style={{backgroundColor:'orange', padding:'5px 12px', borderRadius:'50%', color:'white'}}>{currentPage}</div>
+              <button style={{border:'none'}} onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages}><IoIosArrowForward style={{color:'#8d8f90ff'}} /></button>
             </div>
         </div>
 
