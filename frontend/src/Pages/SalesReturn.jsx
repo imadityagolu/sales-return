@@ -23,9 +23,24 @@ function SalesReturn() {
   
   const [products, setProducts] = useState([]);
   const [error, setError] = useState('');
+  const [search, setSearch] = useState(''); // <-- Add search state
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+
+  const [customers, setCustomers] = useState([]);
+  const [customerName, setCustomerName] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [paymentStatusFilter, setPaymentStatusFilter] = useState('');
+  const [sortBy, setSortBy] = useState('Last 7 Days');
+
+  const fetchCustomers = () => {
+    fetch(`${backend_url}/api/customer/list`)
+    .then(res => res.json())
+    .then(data => { setCustomers(data);})
+    .catch((error) => { setError(error.message); })
+  };
+  useEffect(() => {fetchCustomers();},[]);
 
 const fetchProducts = () => {
   fetch(`${backend_url}/api/sales/listsalesreturn`)
@@ -157,14 +172,34 @@ const handleDelete = async (id) => {
     }
 };
 
+// Filter products by search query (product name or customer name) and select filters
+const filteredProducts = products.filter(item => {
+  const query = search.toLowerCase();
+  const matchesSearch =
+    item.productName?.toLowerCase().includes(query) ||
+    item.customerName?.toLowerCase().includes(query);
+  const matchesCustomer = customerName === '' || item.customerName === customerName;
+  const matchesStatus = statusFilter === '' || item.returnstatus === statusFilter;
+  const matchesPaymentStatus = paymentStatusFilter === '' || item.paymentstatus === paymentStatusFilter;
+  let matchesSort = true;
+  if (sortBy === 'Last 7 Days') {
+    const now = new Date();
+    const itemDate = new Date(item.date);
+    const diffTime = now - itemDate;
+    const diffDays = diffTime / (1000 * 60 * 60 * 24);
+    matchesSort = diffDays <= 7;
+  }
+  return matchesSearch && matchesCustomer && matchesStatus && matchesPaymentStatus && matchesSort;
+});
+
 const indexOfLastItem = currentPage * itemsPerPage;
 const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-const currentProducts = products.slice(indexOfFirstItem, indexOfLastItem);
+const currentProducts = filteredProducts.slice(indexOfFirstItem, indexOfLastItem);
 
-const totalPages = Math.ceil(products.length / itemsPerPage);
+const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 useEffect(() => {
   setCurrentPage(1);
-}, [products]);
+}, [products, search, customerName, statusFilter, paymentStatusFilter, sortBy]);
 
   return (
     <>
@@ -194,20 +229,32 @@ useEffect(() => {
           <div style={{display:'flex', justifyContent:'space-between'}}>
             <div className='srsearchrow' style={{border:'1px solid #E6EAEC', alignItems:'center', padding:'5px', borderRadius:'5px'}}>
               <CiSearch style={{color:'#8d8f90ff'}} />
-              <input type="text" placeholder='search' style={{border:'none', color:'#8d8f90ff', outline:'none'}} />
+              <input type="text" placeholder='search by customer or product...' style={{border:'none', color:'#8d8f90ff', outline:'none', width:'250px'}} 
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+              />
             </div>
             <div style={{display:'flex', gap:'5px'}}>
-              <select style={{border:'1px solid #E6EAEC', color:'#8d8f90ff', borderRadius:'5px'}}>
-                <option>Customer</option>
+              <select style={{border:'1px solid #E6EAEC', color:'#8d8f90ff', borderRadius:'5px'}} value={customerName} onChange={e => setCustomerName(e.target.value)}>
+                <option value=''>--Customer--</option>
+                {customers.map((e) => 
+                <option key={e._id} value={e.customerName}>{e.customerName}</option>
+                )}
               </select>
-              <select style={{border:'1px solid #E6EAEC', color:'#8d8f90ff', borderRadius:'5px'}}>
-                <option>Status</option>
+              <select style={{border:'1px solid #E6EAEC', color:'#8d8f90ff', borderRadius:'5px'}} value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
+                <option value=''>--Status--</option>
+                <option value='Received'>Received</option>
+                <option value='Pending'>Pending</option>
               </select>
-              <select style={{border:'1px solid #E6EAEC', color:'#8d8f90ff', borderRadius:'5px'}}>
-                <option>Payment Status</option>
+              <select style={{border:'1px solid #E6EAEC', color:'#8d8f90ff', borderRadius:'5px'}} value={paymentStatusFilter} onChange={e => setPaymentStatusFilter(e.target.value)}>
+                <option value=''>--Payment Status--</option>
+                <option value='Paid'>Paid</option>
+                <option value='Unpaid'>Unpaid</option>
+                <option value='Overdue'>Overdue</option>
               </select>
-              <select style={{border:'1px solid #E6EAEC', color:'#8d8f90ff', borderRadius:'5px'}}>
-                <option>Sort By: Last 7 Days</option>
+              <select style={{border:'1px solid #E6EAEC', color:'#8d8f90ff', borderRadius:'5px'}} value={sortBy} onChange={e => setSortBy(e.target.value)}>
+                <option value='All'>Sort By: All</option>
+                <option value='Last 7 Days'>Sort By: Last 7 Days</option>
               </select>
             </div>
           </div>

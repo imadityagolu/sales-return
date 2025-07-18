@@ -291,10 +291,11 @@ const handleSalesReturn = async(e) => {
                 <td>{selectedProduct.tax} %</td>
                 <td>${selectedProduct ? productSubtotal(selectedProduct) : "0"}.00</td>
               </tr>) : (
-                <tr>
+                <tr style={{backgroundColor:'white'}}>
                   <td></td>
                   <td></td>
-                  <td style={{padding:'10px'}}>No Product Found</td>
+                  <td style={{padding:'10px', color:'red', textAlign:'center'}}>Select Any One Product</td>
+                  <td></td>
                   <td></td>
                   <td></td>
                   <td></td>
