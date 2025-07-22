@@ -51,10 +51,56 @@ const deletesalesreturn = async(req, res) => {
   }
 }
 
+const importSalesReturnCSV = async (req, res) => {
+  try {
+    const { data } = req.body;
+    if (!Array.isArray(data) || data.length === 0) {
+      return res.status(400).json({ error: 'No data provided.' });
+    }
+    const requiredFields = [
+      'customerName', 'date', 'reference', 'productName', 'grandTotal', 'orderTax', 'orderDiscount', 'shipping', 'returnstatus'
+    ];
+    // Validate all rows
+    for (const row of data) {
+      for (const field of requiredFields) {
+        if (!(field in row) || row[field] === '') {
+          return res.status(400).json({ error: `Missing field ${field} in one or more rows.` });
+        }
+      }
+    }
+    // Prepare documents (add paid, due, paymentstatus logic)
+    const docs = data.map(row => {
+      let paid = 0;
+      let due = 0;
+      let paymentstatus = '';
+      if (row.returnstatus === 'Received') {
+        paid = row.grandTotal;
+        due = 0;
+        paymentstatus = 'Paid';
+      } else if (row.returnstatus === 'Pending') {
+        paid = 0;
+        due = row.grandTotal;
+        paymentstatus = 'Unpaid';
+      }
+      return {
+        ...row,
+        paid,
+        due,
+        paymentstatus
+      };
+    });
+    await salesreturnModel.insertMany(docs);
+    res.status(200).json({ alert: 'Sales returns imported successfully.' });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
 const salesreturnController = {
     returnproduct,
     listsalesreturn,
-    deletesalesreturn
+    deletesalesreturn,
+    importSalesReturnCSV
 };
 
 module.exports = salesreturnController;

@@ -10,12 +10,14 @@ import { FaRegEdit } from "react-icons/fa";
 import { RiDeleteBin5Line } from "react-icons/ri";
 import { IoIosArrowBack } from "react-icons/io";
 import { IoIosArrowForward } from "react-icons/io";
+import { RiImportLine } from "react-icons/ri";
 import Product from '../img/p.jpg';
 import Customer from '../img/c.jpg';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import '../App.css';
 import { useState, useEffect } from 'react';
+import Papa from 'papaparse';
 
 function SalesReturn() {
 
@@ -201,6 +203,61 @@ useEffect(() => {
   setCurrentPage(1);
 }, [products, search, customerName, statusFilter, paymentStatusFilter, sortBy]);
 
+  const fileInputRef = React.useRef();
+
+  const handleImportClick = () => {
+    fileInputRef.current.click();
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!file.name.endsWith('.csv')) {
+      alert('Please select a .csv file');
+      return;
+    }
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: async (results) => {
+        const requiredFields = [
+          'customerName', 'date', 'reference', 'productName', 'grandTotal', 'orderTax', 'orderDiscount', 'shipping', 'returnstatus'
+        ];
+        const valid = results.data.every(row => requiredFields.every(f => f in row && row[f] !== ''));
+        if (!valid) {
+          alert('CSV structure does not match the required schema.');
+          return;
+        }
+        // Optionally: convert types (grandTotal, orderTax, orderDiscount, shipping to Number, date to Date)
+        const formattedData = results.data.map(row => ({
+          ...row,
+          grandTotal: Number(row.grandTotal),
+          orderTax: Number(row.orderTax),
+          orderDiscount: Number(row.orderDiscount),
+          shipping: Number(row.shipping),
+          date: new Date(row.date)
+        }));
+        // Send to backend
+        try {
+          const res = await fetch(`${backend_url}/api/sales/import-csv`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ data: formattedData })
+          });
+          const data = await res.json();
+          if (res.ok) {
+            alert('Import successful!');
+            fetchProducts();
+          } else {
+            alert(data.error || 'Import failed.');
+          }
+        } catch (err) {
+          alert('Error: ' + err.message);
+        }
+      }
+    });
+  };
+
   return (
     <>
     <div className='srbody' style={{padding:'15px 20px'}}>
@@ -212,11 +269,15 @@ useEffect(() => {
                 <br/>
                 <span className='srtitle' style={{color:'#a9abacff'}}>Manage your returns</span>
             </div>
-            <div className='srheadbtn' style={{display:'flex', gap:'10px'}}>
-                <button onClick={handlePdf} style={{backgroundColor:'white', padding:'4px 7px', display:'flex', alignItems:'center', border:'1px solid #E6EAEC',borderRadius:'5px'}}><FaFilePdf style={{color:'red'}} /></button>
-                <button onClick={handleCSV} style={{backgroundColor:'white', padding:'4px 7px', display:'flex', alignItems:'center', border:'1px solid #E6EAEC',borderRadius:'5px'}}><BsFiletypeXml style={{color:'green'}} /></button>
-                <button onClick={() => location.reload()} style={{backgroundColor:'white', padding:'4px 7px', display:'flex', alignItems:'center', border:'1px solid #E6EAEC',borderRadius:'5px'}}><LuRefreshCcw style={{color:'#8d8f90ff'}} /></button>
-                <div style={{backgroundColor:'white', padding:'4px 7px', display:'flex', alignItems:'center', border:'1px solid #E6EAEC',borderRadius:'5px'}}><IoIosArrowUp style={{color:'#8d8f90ff'}} /></div>
+            <div className='srheadbtn' style={{display:'flex', gap:'10px', alignItems:'center'}}>
+                
+                <button type="button" onClick={handleImportClick} style={{backgroundColor:'white', padding:'9px 8px', display:'flex', alignItems:'center', border:'1px solid #E6EAEC',borderRadius:'5px'}}><RiImportLine style={{color:'blue'}} /></button>
+                <input type="file" accept=".csv" ref={fileInputRef} style={{display:'none'}} onChange={handleFileChange} />
+                
+                <button onClick={handlePdf} style={{backgroundColor:'white', padding:'9px 8px', display:'flex', alignItems:'center', border:'1px solid #E6EAEC',borderRadius:'5px'}}><FaFilePdf style={{color:'red'}} /></button>
+                <button onClick={handleCSV} style={{backgroundColor:'white', padding:'9px 8px', display:'flex', alignItems:'center', border:'1px solid #E6EAEC',borderRadius:'5px'}}><BsFiletypeXml style={{color:'green'}} /></button>
+                <button onClick={() => location.reload()} style={{backgroundColor:'white', padding:'9px 8px', display:'flex', alignItems:'center', border:'1px solid #E6EAEC',borderRadius:'5px'}}><LuRefreshCcw style={{color:'#8d8f90ff'}} /></button>
+                <div style={{backgroundColor:'white', padding:'9px 8px', display:'flex', alignItems:'center', border:'1px solid #E6EAEC',borderRadius:'5px'}}><IoIosArrowUp style={{color:'#8d8f90ff'}} /></div>
                 <div style={{backgroundColor:'#FAA046', color:'white', padding:'4px 5px', alignItems:'center', border:'1px solid #E6EAEC',borderRadius:'5px', display:'flex', gap:'5px'}}><Link to="/AddSalesReturn" style={{textDecoration:'none', color:'white'}}><CiCirclePlus className='sricon' style={{fontSize:'25px'}} /> Add Sales Return</Link></div>
             </div>
         </div>
