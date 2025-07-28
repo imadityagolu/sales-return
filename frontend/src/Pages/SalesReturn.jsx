@@ -267,7 +267,7 @@ useEffect(() => {
             <div>
                 <span className='srheader' style={{fontSize:'20px', fontWeight:'500'}}>Sales Return</span>
                 <br/>
-                <span className='srtitle' style={{color:'#a9abacff'}}>Manage your returns</span>
+                <span className='srtitle' style={{color:'#a9abacff'}}>Manage your sales returns</span>
             </div>
             <div className='srheadbtn' style={{display:'flex', gap:'10px', alignItems:'center'}}>
                 
